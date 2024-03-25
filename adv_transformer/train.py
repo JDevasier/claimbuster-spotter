@@ -203,6 +203,12 @@ def main():
 
                     train_x = np.concatenate((train_x[pos_idx], train_x[neg_idx]))
                     train_y = np.concatenate((train_y[pos_idx], train_y[neg_idx]))
+                
+                # Shuffle train data
+                shuffle_idx = np.random.permutation(train_x)
+                train_x = train_x[shuffle_idx]
+                train_y = train_y[shuffle_idx]
+                
             
             logging.info("{} total cross-validation examples after subsampling".format(all_data.get_length()))
 
