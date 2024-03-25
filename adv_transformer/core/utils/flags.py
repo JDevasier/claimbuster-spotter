@@ -67,6 +67,9 @@ flags.DEFINE_integer('cs_train_steps', 15, 'Number of epochs to run.')
 flags.DEFINE_float('cs_lr', 5e-5, 'Learning rate during optimization.')
 flags.DEFINE_float('cs_l2_reg_coeff', 0, 'If val > 0, use L2 Regularization on weights in graph')
 
+flags.DEFINE_bool('cs_imbalance', False, 'Use class imbalance in training data?')
+flags.DEFINE_float('cs_imbalance_ratio', 0.01, 'Percent of positive examples in training data. 0.01 is 1% positive examples.')
+
 # Adversarial and virtual adversarial training parameters
 flags.DEFINE_bool('cs_adv_train', False, 'Use adversarial training?')
 flags.DEFINE_integer('cs_perturb_id', 6, "Index in [('pos', 'seg', 'tok'), ('pos', 'seg'), ('pos', 'tok'), ('seg', 'tok'), ('pos',), ('seg',), ('tok',)] to perturb")

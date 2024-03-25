@@ -1,39 +1,17 @@
-# Copyright (C) 2020 IDIR Lab - UT Arlington
-#
-#     This program is free software: you can redistribute it and/or modify
-#     it under the terms of the GNU General Public License v3 as published by
-#     the Free Software Foundation.
-#
-#     This program is distributed in the hope that it will be useful,
-#     but WITHOUT ANY WARRANTY; without even the implied warranty of
-#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#     GNU General Public License for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#
-# Contact Information:
-#     See: https://idir.uta.edu/cli.html
-#
-#     Chengkai Li
-#     Box 19015
-#     Arlington, TX 76019
-#
-
 import math
 import time
 import os
 from tqdm import tqdm
 from shutil import rmtree
-from adv_transformer.core.utils.data_loader import DataLoader
-from adv_transformer.core.utils.flags import FLAGS, print_flags
+from core.utils.data_loader import DataLoader
+from core.utils.flags import FLAGS, print_flags
 from absl import logging
 import tensorflow as tf
 import numpy as np
-from adv_transformer.core.models.model import ClaimSpotterModel
+from core.models.model import ClaimSpotterModel
 from sklearn.metrics import f1_score, classification_report
 from sklearn.model_selection import StratifiedKFold, train_test_split
-from adv_transformer.core.utils.compute_ndcg import compute_ndcg
+from core.utils.compute_ndcg import compute_ndcg
 
 K = tf.keras
 
@@ -119,7 +97,7 @@ def train_model(train_x, train_y, train_len, test_x, test_y, test_len, class_wei
             start = time.time()
             epochs_trav = 0
 
-        if epoch >= FLAGS.cs_train_steps / 2 and epoch % FLAGS.cs_model_save_interval == 0:
+        if epoch % FLAGS.cs_model_save_interval == 0:
             loc = model.save_custom_model(epoch, fold, {
                 'f1_wei': f1_wei,
                 'f1_mac': f1_mac,
@@ -197,6 +175,36 @@ def main():
             train_x, test_x = all_data.x[train_idx], all_data.x[test_idx]
             train_y, test_y = all_data.y[train_idx], all_data.y[test_idx]
             train_x, val_x, train_y, val_y = train_test_split(train_x, train_y, test_size=0.1)
+
+            # Subsample for imbalance experiment
+            if FLAGS.cs_imbalance:
+                # Get current positive class ratio
+                pos_ratio = np.unique(train_y, return_counts=True)[1][1] / len(train_y)
+
+                pos_idx = np.where(train_y == 1)[0]
+                neg_idx = np.where(train_y == 0)[0]
+
+                num_pos, num_neg = len(pos_idx), len(neg_idx)
+                logging.info("Pos: {} Neg: {}".format(num_pos, num_neg))
+
+                if FLAGS.cs_imbalance_ratio > pos_ratio:
+                    # Subsample negative class, get first n samples without shuffle
+                    neg_samples_to_get = math.ceil((num_pos / FLAGS.cs_imbalance_ratio) - num_pos)
+                    logging.info("Neg samples to get: {}".format(neg_samples_to_get))
+                    neg_idx = neg_idx[:neg_samples_to_get]
+
+                    train_x = np.concatenate((train_x[pos_idx], train_x[neg_idx]))
+                    train_y = np.concatenate((train_y[pos_idx], train_y[neg_idx]))
+                else:
+                    # Subsample positive class, get first n samples without shuffle
+                    pos_samples_to_get = math.ceil(num_neg * (FLAGS.cs_imbalance_ratio / (1 - FLAGS.cs_imbalance_ratio)))
+                    logging.info("Pos samples to get: {}".format(pos_samples_to_get))
+                    pos_idx = pos_idx[:pos_samples_to_get]
+
+                    train_x = np.concatenate((train_x[pos_idx], train_x[neg_idx]))
+                    train_y = np.concatenate((train_y[pos_idx], train_y[neg_idx]))
+            
+            logging.info("{} total cross-validation examples after subsampling".format(all_data.get_length()))
 
             train_len, val_len, test_len = len(train_y), len(val_y), len(test_y)
             print_str = '|     Running k-fold cross-val iteration #{}: {} train {} val {} test     |'.format(
