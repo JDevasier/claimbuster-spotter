@@ -216,6 +216,8 @@ def main():
             logging.info(np.unique(train_y, return_counts=True)[1].tolist())
             logging.info(np.unique(test_y, return_counts=True)[1].tolist())
 
+            logging.info('Class weights: {}'.format(DataLoader.compute_class_weights_fold(train_y)))
+
             res = train_model(train_x, train_y, train_len, val_x, val_y, val_len,
                               DataLoader.compute_class_weights_fold(train_y), iteration)
 
