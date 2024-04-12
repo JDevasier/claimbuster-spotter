@@ -163,6 +163,8 @@ def main():
 
     if FLAGS.cs_k_fold > 1:
         all_data = data_load.load_crossval_data()
+        print(all_data.x[:2])
+        print(all_data.y[:2])
         all_data.x = np.array(all_data.x)
         all_data.y = np.array(all_data.y)
         logging.info("{} total cross-validation examples".format(all_data.get_length()))
@@ -193,8 +195,8 @@ def main():
                     logging.info("Neg samples to get: {}".format(neg_samples_to_get))
                     neg_idx = neg_idx[:neg_samples_to_get]
 
-                    train_x = np.concatenate((np.array(train_x[pos_idx]), np.array(train_x[neg_idx])))
-                    train_y = np.concatenate((np.array(train_y[pos_idx]), np.array(train_y[neg_idx])))
+                    train_x = np.concatenate((train_x[pos_idx], train_x[neg_idx]))
+                    train_y = np.concatenate((train_y[pos_idx], train_y[neg_idx]))
                 else:
                     # Subsample positive class, get first n samples without shuffle
                     pos_samples_to_get = math.ceil(num_neg * (FLAGS.cs_imbalance_ratio / (1 - FLAGS.cs_imbalance_ratio)))
