@@ -193,8 +193,8 @@ def main():
                     logging.info("Neg samples to get: {}".format(neg_samples_to_get))
                     neg_idx = neg_idx[:neg_samples_to_get]
 
-                    train_x = np.concatenate((train_x[pos_idx], train_x[neg_idx]))
-                    train_y = np.concatenate((train_y[pos_idx], train_y[neg_idx]))
+                    train_x = np.concatenate((np.array(train_x[pos_idx]), np.array(train_x[neg_idx])))
+                    train_y = np.concatenate((np.array(train_y[pos_idx]), np.array(train_y[neg_idx])))
                 else:
                     # Subsample positive class, get first n samples without shuffle
                     pos_samples_to_get = math.ceil(num_neg * (FLAGS.cs_imbalance_ratio / (1 - FLAGS.cs_imbalance_ratio)))
