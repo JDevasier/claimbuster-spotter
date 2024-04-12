@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Define the thresholds
-thresholds=(0.01 0.05 0.1 0.3 0.5 0.7 0.9 0.95 0.99)
+# thresholds=(0.01 0.05 0.1 0.3 0.5 0.7 0.9 0.95 0.99)
+thresholds=(0.99 0.95 0.9 0.7 0.5 0.3 0.1 0.05 0.01)
 
 # Loop through each threshold
 for threshold in "${thresholds[@]}"
