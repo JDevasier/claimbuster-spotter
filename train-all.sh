@@ -9,6 +9,6 @@ do
     # Create the directory name based on the threshold
     model_dir="./output/bb_${threshold}/"
     
-    echo "Running command for threshold: $threshold and imbalance ratio: $imbalance_ratio"
-    python3 -m adv_transformer.train --cs_model_dir="$model_dir" --cs_adv_train=False --cs_gpu=0 --cs_train_steps=10 --cs_batch_size_adv=12 --cs_lambda=0.1 --cs_imbalance=True --cs_imbalance_ratio=$imbalance_ratio
+    echo "Running command for threshold: $threshold"
+    python3 -m adv_transformer.train --cs_model_dir="$model_dir" --cs_adv_train=False --cs_gpu=0 --cs_train_steps=10 --cs_batch_size_adv=12 --cs_lambda=0.1 --cs_imbalance=True --cs_imbalance_ratio=$threshold
 done
